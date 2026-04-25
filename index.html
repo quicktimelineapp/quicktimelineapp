@@ -7,30 +7,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Dynamic Theme System */
-        :root {
-            --primary: #4f46e5;
-        }
+        :root { --primary: #4f46e5; }
         :root[data-theme="light"] {
-            --bg-color: #f3f4f6;
-            --surface: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --timeline-spine: #cbd5e1;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --toast-bg: #1f2937;
-            --toast-text: #ffffff;
+            --bg-color: #f3f4f6; --surface: #ffffff; --text-main: #111827; --text-muted: #6b7280;
+            --border: #e5e7eb; --timeline-spine: #cbd5e1; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --toast-bg: #1f2937; --toast-text: #ffffff; --toolbar-bg: #f9fafb; --toolbar-hover: #e5e7eb;
         }
         :root[data-theme="dark"] {
-            --bg-color: #111827;
-            --surface: #1f2937;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border: #374151;
-            --timeline-spine: #4b5563;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            --toast-bg: #ffffff;
-            --toast-text: #111827;
+            --bg-color: #111827; --surface: #1f2937; --text-main: #f9fafb; --text-muted: #9ca3af;
+            --border: #374151; --timeline-spine: #4b5563; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --toast-bg: #ffffff; --toast-text: #111827; --toolbar-bg: #111827; --toolbar-hover: #374151;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -38,7 +24,7 @@
 
         /* Navigation */
         header { background-color: var(--surface); padding: 1rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease;}
+        .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
         .brand span { color: var(--primary); }
         .controls { display: flex; gap: 0.75rem; align-items: center; }
 
@@ -61,16 +47,27 @@
         .editor-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
         .editor-header h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Template Library */
-        .template-library { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .template-library { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
         .template-btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; }
         .template-btn:hover { color: var(--primary); border-color: var(--primary); }
 
-        textarea { flex: 1; width: 100%; background-color: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.6; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-        textarea:focus { border-color: var(--primary); }
-        .cheat-sheet { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+        /* Unified Editor Component */
+        .editor-container { display: flex; flex-direction: column; flex: 1; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* The New Toolbar */
+        .editor-toolbar { display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem; background-color: var(--toolbar-bg); border-bottom: 1px solid var(--border); }
+        .toolbar-btn { padding: 0.4rem 0.6rem; background: transparent; border: none; border-radius: 4px; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+        .toolbar-btn:hover { background-color: var(--toolbar-hover); color: var(--text-main); }
+        .toolbar-divider { width: 1px; height: 1.2rem; background-color: var(--border); margin: 0 0.25rem; }
+        
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .dot-g { background-color: #10b981; }
+        .dot-b { background-color: #3b82f6; }
+        .dot-r { background-color: #ef4444; }
 
-        /* Preview Panel & Timeline */
+        textarea { flex: 1; width: 100%; background-color: var(--bg-color); color: var(--text-main); border: none; padding: 1rem; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.6; outline: none; }
+        
+        /* Preview Panel */
         .preview-panel { flex: 1; overflow-y: auto; padding: 3rem; position: relative; }
         .export-container { background-color: var(--bg-color); padding: 2rem; border-radius: 12px; max-width: 900px; margin: 0 auto; }
 
@@ -80,12 +77,11 @@
         .timeline-item { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
         .timeline-item:nth-child(odd) { left: 0; }
         .timeline-item:nth-child(even) { left: 50%; }
-
         .timeline-item::after { content: ''; position: absolute; width: 20px; height: 20px; background-color: var(--surface); border: 4px solid var(--primary); border-radius: 50%; top: 20px; z-index: 1; transition: border-color 0.3s ease, background-color 0.3s ease; }
         .timeline-item:nth-child(odd)::after { right: -10px; }
         .timeline-item:nth-child(even)::after { left: -10px; }
 
-        /* Status Colors for the timeline dots */
+        /* Timeline Status Colors */
         .timeline-item.dot-done::after { border-color: #10b981; background-color: #10b981; }
         .timeline-item.dot-active::after { border-color: #3b82f6; background-color: #3b82f6; }
         .timeline-item.dot-blocked::after { border-color: #ef4444; background-color: #ef4444; }
@@ -96,12 +92,10 @@
         .event-wrapper { margin-top: 0.8rem; position: relative; padding-left: 14px; }
         .event-bullet { position: absolute; left: 0; top: 0; color: var(--primary); font-weight: bold; }
         .event-text { color: var(--text-main); line-height: 1.5; font-size: 0.95rem; }
-        
-        /* Markdown Links */
         .event-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
         .event-text a:hover { text-decoration: underline; }
 
-        /* Status Pills */
+        /* Rendered Pills */
         .status-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; margin-right: 6px; vertical-align: middle; color: #fff; letter-spacing: 0.5px; }
         .pill-done { background-color: #10b981; }
         .pill-active { background-color: #3b82f6; }
@@ -137,16 +131,27 @@
     <main>
         <div class="editor-panel">
             <div class="editor-header">
-                <h2>Data Input</h2>
+                <h2>Builder</h2>
             </div>
             <div class="template-library">
                 <button class="template-btn" onclick="loadTemplate('software')">Software Build</button>
                 <button class="template-btn" onclick="loadTemplate('event')">Event Plan</button>
                 <button class="template-btn" onclick="loadTemplate('study')">Study Schedule</button>
             </div>
-            <textarea id="inputText" placeholder="Format: Date | Event..."></textarea>
-            <div class="cheat-sheet">
-                <strong>Tips:</strong> Tags: [DONE] [ACTIVE] [BLOCKED] | Bold: **text** | Link: [name](url)
+            
+            <div class="editor-container">
+                <div class="editor-toolbar">
+                    <button class="toolbar-btn" onclick="insertAtCursor('\nNew Date | ', 'New Event')" title="Add Milestone">📅 + Date</button>
+                    <div class="toolbar-divider"></div>
+                    <button class="toolbar-btn" onclick="insertAtCursor('[DONE] ', '')" title="Mark Done"><span class="status-dot dot-g"></span></button>
+                    <button class="toolbar-btn" onclick="insertAtCursor('[ACTIVE] ', '')" title="Mark Active"><span class="status-dot dot-b"></span></button>
+                    <button class="toolbar-btn" onclick="insertAtCursor('[BLOCKED] ', '')" title="Mark Blocked"><span class="status-dot dot-r"></span></button>
+                    <div class="toolbar-divider"></div>
+                    <button class="toolbar-btn" onclick="insertAtCursor('**', '**')" title="Bold"><b>B</b></button>
+                    <button class="toolbar-btn" onclick="insertAtCursor('*', '*')" title="Italic"><i>I</i></button>
+                    <button class="toolbar-btn" onclick="insertAtCursor('[', '](https://url-here.com)')" title="Link">🔗</button>
+                </div>
+                <textarea id="inputText" placeholder="Start typing or click a template above..."></textarea>
             </div>
         </div>
 
@@ -171,7 +176,7 @@
         const templates = {
             software: "Q1 2024 | **Phase 1: Architecture**\n[DONE] Finalize database schema\n[DONE] Setup GitHub repository and CI/CD pipelines\n\nQ2 2024 | **Phase 2: Core Features**\n[DONE] Build user authentication\n[ACTIVE] Develop Markdown parsing engine\n[BLOCKED] Waiting on API keys for payment gateway integration\n\nQ3 2024 | **Phase 3: Launch**\nBeta testing with first 100 users\nPublic release on [Product Hunt](https://producthunt.com)",
             event: "October 10 | **Pre-Event Logistics**\n[DONE] Secure venue deposit\n[DONE] Finalize catering menu and dietary requirements\n\nOctober 15 | **Marketing Push**\n[ACTIVE] Launch social media ad campaign\n[ACTIVE] Send out email blasts to previous attendees\n\nOctober 25 | **Final Checks**\n[BLOCKED] Waiting for keynote speaker flight confirmation\nPrint physical name badges",
-            study: "Week 1 | **Calculus Foundations**\n[DONE] Read Chapters 1-3\n[DONE] Complete practice problem set A\n\nWeek 2 | **Derivatives**\n[ACTIVE] Review Khan Academy lectures on chain rule\n[BLOCKED] Need to ask professor about implicit differentiation\n\nWeek 3 | **Midterm Prep**\nTake practice exam\nReview flashcards"
+            study: "Week 1 | **Foundations**\n[DONE] Read Chapters 1-3\n[DONE] Complete practice problem set A\n\nWeek 2 | **Advanced Concepts**\n[ACTIVE] Review video lectures\n[BLOCKED] Need to ask professor for clarification\n\nWeek 3 | **Midterm Prep**\nTake practice exam\nReview flashcards"
         };
 
         function loadTemplate(type) {
@@ -179,23 +184,37 @@
             handleInput();
         }
 
+        // --- Core Engine: Toolbar Insertion Logic ---
+        function insertAtCursor(startText, endText = '') {
+            const start = inputText.selectionStart;
+            const end = inputText.selectionEnd;
+            const text = inputText.value;
+            const selectedText = text.substring(start, end);
+            
+            const before = text.substring(0, start);
+            const after = text.substring(end, text.length);
+            
+            inputText.value = before + startText + selectedText + endText + after;
+            
+            // Re-focus and move cursor inside the tags if needed
+            const newCursorPos = start + startText.length + selectedText.length;
+            inputText.focus();
+            inputText.setSelectionRange(newCursorPos, newCursorPos);
+            
+            handleInput(); // Re-render the timeline
+        }
+
         // --- Core Engine: Markdown & Status Parser ---
         function parseText(text) {
             let html = text;
-            let dominantStatus = null; // Used to color the timeline dot
+            let dominantStatus = null; 
 
-            // 1. Parse Status Tags
             if (html.includes('[DONE]')) { dominantStatus = 'done'; html = html.replace(/\[DONE\]/g, '<span class="status-pill pill-done">DONE</span>'); }
             if (html.includes('[ACTIVE]')) { dominantStatus = 'active'; html = html.replace(/\[ACTIVE\]/g, '<span class="status-pill pill-active">ACTIVE</span>'); }
             if (html.includes('[BLOCKED]')) { dominantStatus = 'blocked'; html = html.replace(/\[BLOCKED\]/g, '<span class="status-pill pill-blocked">BLOCKED</span>'); }
 
-            // 2. Parse Bold (**text**)
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // 3. Parse Italics (*text*)
             html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            
-            // 4. Parse Links [name](url)
             html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
 
             return { html, dominantStatus };
@@ -218,21 +237,15 @@
                     if (event) currentNode.events.push(event);
                     nodes.push(currentNode);
                 } else {
-                    if (currentNode) {
-                        currentNode.events.push(trimmedLine);
-                    } else {
-                        currentNode = { date: '', events: [trimmedLine], nodeStatus: null };
-                        nodes.push(currentNode);
-                    }
+                    if (currentNode) { currentNode.events.push(trimmedLine); } 
+                    else { currentNode = { date: '', events: [trimmedLine], nodeStatus: null }; nodes.push(currentNode); }
                 }
             });
 
             nodes.forEach(node => {
                 let dotClass = "";
-                
                 const eventsHtml = node.events.map(e => {
                     const parsed = parseText(e);
-                    // Determine dot color based on the most severe status in this node
                     if (parsed.dominantStatus === 'blocked') node.nodeStatus = 'blocked';
                     else if (parsed.dominantStatus === 'active' && node.nodeStatus !== 'blocked') node.nodeStatus = 'active';
                     else if (parsed.dominantStatus === 'done' && !node.nodeStatus) node.nodeStatus = 'done';
