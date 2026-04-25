@@ -7,27 +7,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Dynamic Theme System */
+        :root {
+            --primary: #4f46e5; /* Default dynamic color */
+        }
         :root[data-theme="light"] {
             --bg-color: #f3f4f6;
             --surface: #ffffff;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
             --text-main: #111827;
             --text-muted: #6b7280;
             --border: #e5e7eb;
             --timeline-spine: #cbd5e1;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --toast-bg: #1f2937;
+            --toast-text: #ffffff;
         }
         :root[data-theme="dark"] {
             --bg-color: #111827;
             --surface: #1f2937;
-            --primary: #6366f1;
-            --primary-hover: #818cf8;
             --text-main: #f9fafb;
             --text-muted: #9ca3af;
             --border: #374151;
             --timeline-spine: #4b5563;
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --toast-bg: #ffffff;
+            --toast-text: #111827;
         }
 
         * {
@@ -35,7 +38,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -58,17 +61,10 @@
             z-index: 10;
         }
         
-        .brand h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
+        .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
         .brand span { color: var(--primary); }
         
-        .controls {
-            display: flex;
-            gap: 1rem;
-        }
+        .controls { display: flex; gap: 0.75rem; align-items: center; }
 
         button {
             padding: 0.5rem 1rem;
@@ -77,30 +73,44 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-        }
+        .btn-secondary { background-color: transparent; color: var(--text-main); border: 1px solid var(--border); }
         .btn-secondary:hover { background-color: var(--border); }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        /* Custom Color Picker Styling */
+        .color-picker-wrapper {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
-        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
 
         /* Main Workspace layout */
-        main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        main { display: flex; flex: 1; overflow: hidden; }
 
         /* Left Panel - The Editor */
         .editor-panel {
@@ -113,13 +123,7 @@
             z-index: 5;
         }
 
-        .editor-panel h2 {
-            font-size: 1rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-        }
+        .editor-panel h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; display: flex; justify-content: space-between; }
 
         textarea {
             flex: 1;
@@ -138,109 +142,44 @@
         }
         textarea:focus { border-color: var(--primary); }
 
-        .status {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
         /* Right Panel - The Canvas */
-        .preview-panel {
-            flex: 1;
-            overflow-y: auto;
-            padding: 3rem;
-            position: relative;
-        }
+        .preview-panel { flex: 1; overflow-y: auto; padding: 3rem; position: relative; }
 
-        /* Center-Spine Timeline CSS */
-        .export-container {
-            background-color: var(--bg-color); /* Matches theme for export */
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .export-container { background-color: var(--bg-color); padding: 2rem; border-radius: 12px; max-width: 900px; margin: 0 auto; }
 
-        .timeline {
-            position: relative;
-            max-width: 100%;
-            margin: 0 auto;
-        }
+        .timeline { position: relative; max-width: 100%; margin: 0 auto; }
+        .timeline::after { content: ''; position: absolute; width: 4px; background-color: var(--timeline-spine); top: 0; bottom: 0; left: 50%; margin-left: -2px; border-radius: 2px; }
 
-        /* The central spine */
-        .timeline::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            background-color: var(--timeline-spine);
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            margin-left: -2px;
-            border-radius: 2px;
-        }
-
-        .timeline-item {
-            padding: 10px 40px;
-            position: relative;
-            background-color: inherit;
-            width: 50%;
-        }
-
-        /* Left side nodes */
+        .timeline-item { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
         .timeline-item:nth-child(odd) { left: 0; }
-        /* Right side nodes */
         .timeline-item:nth-child(even) { left: 50%; }
 
-        /* The dots on the spine */
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: var(--surface);
-            border: 4px solid var(--primary);
-            border-radius: 50%;
-            top: 20px;
-            z-index: 1;
-        }
-
+        .timeline-item::after { content: ''; position: absolute; width: 20px; height: 20px; background-color: var(--surface); border: 4px solid var(--primary); border-radius: 50%; top: 20px; z-index: 1; transition: border-color 0.3s ease; }
         .timeline-item:nth-child(odd)::after { right: -10px; }
         .timeline-item:nth-child(even)::after { left: -10px; }
 
-        .content {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            position: relative;
-        }
+        .content { background: var(--surface); padding: 1.5rem; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .date { font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem; display: block; transition: color 0.3s ease; }
+        .event-text { color: var(--text-main); line-height: 1.5; }
 
-        .date {
-            font-weight: 800;
-            color: var(--primary);
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            display: block;
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: var(--toast-bg); color: var(--toast-text);
+            text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100;
+            left: 50%; bottom: 30px; font-size: 0.9rem; font-weight: bold; transform: translateX(-50%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s;
         }
+        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
-        .event-text {
-            color: var(--text-main);
-            line-height: 1.5;
-        }
-
-        /* Responsive constraints */
         @media (max-width: 900px) {
             main { flex-direction: column; overflow: auto;}
-            .editor-panel { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
-            .preview-panel { height: 60vh; padding: 1rem; }
+            .editor-panel { width: 100%; height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+            .preview-panel { height: 50vh; padding: 1rem; }
             .timeline::after { left: 31px; }
             .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
             .timeline-item:nth-child(even) { left: 0%; }
             .timeline-item:nth-child(odd)::after, .timeline-item:nth-child(even)::after { left: 21px; }
+            header { flex-direction: column; gap: 1rem; }
         }
     </style>
 </head>
@@ -251,25 +190,22 @@
             <h1>Chrono<span>Graph</span></h1>
         </div>
         <div class="controls">
-            <button class="btn-secondary" id="themeToggle">🌓 Toggle Theme</button>
-            <button class="btn-primary" id="downloadBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Export PNG
-            </button>
+            <div class="color-picker-wrapper">
+                Color <input type="color" id="brandColor" value="#4f46e5">
+            </div>
+            <button class="btn-secondary" id="themeToggle">🌓</button>
+            <button class="btn-secondary" id="shareBtn">🔗 Copy Link</button>
+            <button class="btn-primary" id="downloadBtn">⬇️ Export PNG</button>
         </div>
     </header>
 
     <main>
         <div class="editor-panel">
             <h2>Data Input</h2>
-            <textarea id="inputText" placeholder="Enter data as: Date | Event..."></textarea>
-            <div class="status">
-                <span id="saveStatus">✓ Auto-saved locally</span>
-                <span>Format: Date | Event</span>
-            </div>
+            <textarea id="inputText" placeholder="Format: Date | Event..."></textarea>
         </div>
 
-        <div class="preview-panel" id="scrollArea">
+        <div class="preview-panel">
             <div class="export-container" id="exportArea">
                 <div class="timeline" id="timelineOutput">
                     </div>
@@ -277,66 +213,108 @@
         </div>
     </main>
 
+    <div id="toast">Notification</div>
+
     <script>
         const inputText = document.getElementById('inputText');
         const timelineOutput = document.getElementById('timelineOutput');
         const themeToggle = document.getElementById('themeToggle');
         const downloadBtn = document.getElementById('downloadBtn');
-        const saveStatus = document.getElementById('saveStatus');
+        const shareBtn = document.getElementById('shareBtn');
+        const brandColor = document.getElementById('brandColor');
+        const toast = document.getElementById('toast');
 
-        // Default text for first-time users
-        const defaultText = "Q1 2024 | Concept validation and market research\nQ2 2024 | MVP development and beta testing\nQ3 2024 | Official public launch\nQ4 2024 | Reached $1/day profitability\n2025 | Scaling features and expanding user base";
+        const defaultText = "2024 | Phase 1: Development\nConcept validation and market research\nMVP development and beta testing\n\n2025 | Phase 2: Launch\nOfficial public launch\nReached initial active user base\nExpanding features based on feedback";
 
-        // 1. Core Render Logic
+        // --- Core Engine: Stateful Rendering ---
         function renderTimeline() {
             const lines = inputText.value.split('\n');
             let html = '';
+            const nodes = [];
+            let currentNode = null;
 
             lines.forEach(line => {
-                if (line.trim() === '') return;
-                const parts = line.split('|');
-                let date = '';
-                let event = '';
+                const trimmedLine = line.trim();
+                if (trimmedLine === '') return;
 
-                if (parts.length >= 2) {
-                    date = parts[0].trim();
-                    event = parts.slice(1).join('|').trim();
+                if (trimmedLine.includes('|')) {
+                    const parts = trimmedLine.split('|');
+                    currentNode = { date: parts[0].trim(), events: [] };
+                    const event = parts.slice(1).join('|').trim();
+                    if (event) currentNode.events.push(event);
+                    nodes.push(currentNode);
                 } else {
-                    event = line.trim();
+                    if (currentNode) {
+                        currentNode.events.push(trimmedLine);
+                    } else {
+                        currentNode = { date: '', events: [trimmedLine] };
+                        nodes.push(currentNode);
+                    }
                 }
+            });
+
+            nodes.forEach(node => {
+                const eventsHtml = node.events.map(e => 
+                    `<div class="event-text" style="margin-top: 0.5rem; position: relative; padding-left: 12px;">
+                        <span style="position: absolute; left: 0; top: 0; color: var(--primary); font-weight: bold;">•</span>
+                        ${e}
+                    </div>`
+                ).join('');
 
                 html += `
                     <div class="timeline-item">
                         <div class="content">
-                            ${date ? `<span class="date">${date}</span>` : ''}
-                            <div class="event-text">${event}</div>
+                            ${node.date ? `<span class="date">${node.date}</span>` : ''}
+                            ${eventsHtml}
                         </div>
                     </div>
                 `;
             });
-
             timelineOutput.innerHTML = html;
         }
 
-        // 2. Auto-Save Logic (Local Storage)
+        // --- Utility: Toast Notification ---
+        function showToast(message) {
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // --- Engine: Auto-Save ---
         function handleInput() {
             renderTimeline();
             localStorage.setItem('chronoGraphData', inputText.value);
-            saveStatus.textContent = "Saving...";
-            setTimeout(() => { saveStatus.textContent = "✓ Auto-saved locally"; }, 500);
         }
 
-        function loadSavedData() {
-            const saved = localStorage.getItem('chronoGraphData');
-            if (saved !== null) {
-                inputText.value = saved;
+        // --- Engine: URL Decoder & Load Logic ---
+        function loadData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('d')) {
+                try {
+                    inputText.value = decodeURIComponent(urlParams.get('d'));
+                    showToast("Shared timeline loaded!");
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch(e) {
+                    console.error("Could not parse shared link.");
+                }
             } else {
-                inputText.value = defaultText;
+                const saved = localStorage.getItem('chronoGraphData');
+                inputText.value = saved !== null ? saved : defaultText;
             }
             renderTimeline();
         }
 
-        // 3. Theme Toggle Logic
+        // --- Engine: URL Encoder (Share Links) ---
+        shareBtn.addEventListener('click', () => {
+            const encodedText = encodeURIComponent(inputText.value);
+            const shareUrl = window.location.origin + window.location.pathname + '?d=' + encodedText;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast("Link copied to clipboard!");
+            });
+        });
+
+        // --- Engine: Theme & Brand Colors ---
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -344,35 +322,42 @@
             localStorage.setItem('chronoGraphTheme', newTheme);
         });
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('chronoGraphTheme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
+        brandColor.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--primary', e.target.value);
+            localStorage.setItem('chronoBrandColor', e.target.value);
+        });
+
+        if (localStorage.getItem('chronoGraphTheme')) {
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('chronoGraphTheme'));
+        }
+        if (localStorage.getItem('chronoBrandColor')) {
+            const savedColor = localStorage.getItem('chronoBrandColor');
+            document.documentElement.style.setProperty('--primary', savedColor);
+            brandColor.value = savedColor;
         }
 
-        // 4. Export to PNG Logic
+        // --- Engine: PNG Export ---
         downloadBtn.addEventListener('click', () => {
             const exportArea = document.getElementById('exportArea');
             const originalText = downloadBtn.innerHTML;
-            downloadBtn.innerHTML = "Generating...";
+            downloadBtn.innerHTML = "⏳ Generating...";
             
             html2canvas(exportArea, {
                 backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-color'),
-                scale: 2 // High resolution
+                scale: 2
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'timeline-export.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                downloadBtn.innerHTML = originalText;
+                downloadBtn.innerHTML = "⬇️ Export PNG";
+                showToast("Image downloaded!");
             });
         });
 
-        // Event Listeners
+        // Event Listeners & Initialization
         inputText.addEventListener('input', handleInput);
-        
-        // Init
-        loadSavedData();
+        loadData();
     </script>
 
 </body>
