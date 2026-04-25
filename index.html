@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChronoGraph | Instant Timeline Generator</title>
+    <title>ChronoGraph | Pro Timeline Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Dynamic Theme System */
         :root {
-            --primary: #4f46e5; /* Default dynamic color */
+            --primary: #4f46e5;
         }
         :root[data-theme="light"] {
             --bg-color: #f3f4f6;
@@ -33,118 +33,45 @@
             --toast-text: #111827;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Top Navigation */
-        header {
-            background-color: var(--surface);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-        
-        .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+        /* Navigation */
+        header { background-color: var(--surface); padding: 1rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; transition: color 0.3s ease;}
         .brand span { color: var(--primary); }
-        
         .controls { display: flex; gap: 0.75rem; align-items: center; }
 
-        button {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
+        button { padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
         .btn-secondary { background-color: transparent; color: var(--text-main); border: 1px solid var(--border); }
         .btn-secondary:hover { background-color: var(--border); }
-
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-        /* Custom Color Picker Styling */
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.3rem 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        input[type="color"] {
-            -webkit-appearance: none;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            padding: 0;
-            background: none;
-        }
+        .color-picker-wrapper { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
+        input[type="color"] { -webkit-appearance: none; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; padding: 0; background: none; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
 
-        /* Main Workspace layout */
+        /* Main Workspace */
         main { display: flex; flex: 1; overflow: hidden; }
 
-        /* Left Panel - The Editor */
-        .editor-panel {
-            width: 400px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            z-index: 5;
-        }
+        /* Editor Panel */
+        .editor-panel { width: 450px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; z-index: 5; }
+        .editor-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
+        .editor-header h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Template Library */
+        .template-library { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .template-btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; }
+        .template-btn:hover { color: var(--primary); border-color: var(--primary); }
 
-        .editor-panel h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; display: flex; justify-content: space-between; }
-
-        textarea {
-            flex: 1;
-            width: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            resize: none;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            outline: none;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-        }
+        textarea { flex: 1; width: 100%; background-color: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; resize: none; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.6; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         textarea:focus { border-color: var(--primary); }
+        .cheat-sheet { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
 
-        /* Right Panel - The Canvas */
+        /* Preview Panel & Timeline */
         .preview-panel { flex: 1; overflow-y: auto; padding: 3rem; position: relative; }
-
         .export-container { background-color: var(--bg-color); padding: 2rem; border-radius: 12px; max-width: 900px; margin: 0 auto; }
 
         .timeline { position: relative; max-width: 100%; margin: 0 auto; }
@@ -154,21 +81,33 @@
         .timeline-item:nth-child(odd) { left: 0; }
         .timeline-item:nth-child(even) { left: 50%; }
 
-        .timeline-item::after { content: ''; position: absolute; width: 20px; height: 20px; background-color: var(--surface); border: 4px solid var(--primary); border-radius: 50%; top: 20px; z-index: 1; transition: border-color 0.3s ease; }
+        .timeline-item::after { content: ''; position: absolute; width: 20px; height: 20px; background-color: var(--surface); border: 4px solid var(--primary); border-radius: 50%; top: 20px; z-index: 1; transition: border-color 0.3s ease, background-color 0.3s ease; }
         .timeline-item:nth-child(odd)::after { right: -10px; }
         .timeline-item:nth-child(even)::after { left: -10px; }
 
-        .content { background: var(--surface); padding: 1.5rem; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .date { font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem; display: block; transition: color 0.3s ease; }
-        .event-text { color: var(--text-main); line-height: 1.5; }
+        /* Status Colors for the timeline dots */
+        .timeline-item.dot-done::after { border-color: #10b981; background-color: #10b981; }
+        .timeline-item.dot-active::after { border-color: #3b82f6; background-color: #3b82f6; }
+        .timeline-item.dot-blocked::after { border-color: #ef4444; background-color: #ef4444; }
 
-        /* Toast Notification */
-        #toast {
-            visibility: hidden; min-width: 250px; background-color: var(--toast-bg); color: var(--toast-text);
-            text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100;
-            left: 50%; bottom: 30px; font-size: 0.9rem; font-weight: bold; transform: translateX(-50%);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s;
-        }
+        .content { background: var(--surface); padding: 1.5rem; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: color 0.3s ease; }
+        .date { font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem; display: block; transition: color 0.3s ease; }
+        
+        .event-wrapper { margin-top: 0.8rem; position: relative; padding-left: 14px; }
+        .event-bullet { position: absolute; left: 0; top: 0; color: var(--primary); font-weight: bold; }
+        .event-text { color: var(--text-main); line-height: 1.5; font-size: 0.95rem; }
+        
+        /* Markdown Links */
+        .event-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .event-text a:hover { text-decoration: underline; }
+
+        /* Status Pills */
+        .status-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; margin-right: 6px; vertical-align: middle; color: #fff; letter-spacing: 0.5px; }
+        .pill-done { background-color: #10b981; }
+        .pill-active { background-color: #3b82f6; }
+        .pill-blocked { background-color: #ef4444; }
+
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--toast-bg); color: var(--toast-text); text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 0.9rem; font-weight: bold; transform: translateX(-50%); box-shadow: 0 4px 6px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
         @media (max-width: 900px) {
@@ -186,29 +125,34 @@
 <body>
 
     <header>
-        <div class="brand">
-            <h1>Chrono<span>Graph</span></h1>
-        </div>
+        <div class="brand"><h1>Chrono<span>Graph</span></h1></div>
         <div class="controls">
-            <div class="color-picker-wrapper">
-                Color <input type="color" id="brandColor" value="#4f46e5">
-            </div>
+            <div class="color-picker-wrapper">Color <input type="color" id="brandColor" value="#4f46e5"></div>
             <button class="btn-secondary" id="themeToggle">🌓</button>
-            <button class="btn-secondary" id="shareBtn">🔗 Copy Link</button>
+            <button class="btn-secondary" id="shareBtn">🔗 Share Link</button>
             <button class="btn-primary" id="downloadBtn">⬇️ Export PNG</button>
         </div>
     </header>
 
     <main>
         <div class="editor-panel">
-            <h2>Data Input</h2>
+            <div class="editor-header">
+                <h2>Data Input</h2>
+            </div>
+            <div class="template-library">
+                <button class="template-btn" onclick="loadTemplate('software')">Software Build</button>
+                <button class="template-btn" onclick="loadTemplate('event')">Event Plan</button>
+                <button class="template-btn" onclick="loadTemplate('study')">Study Schedule</button>
+            </div>
             <textarea id="inputText" placeholder="Format: Date | Event..."></textarea>
+            <div class="cheat-sheet">
+                <strong>Tips:</strong> Tags: [DONE] [ACTIVE] [BLOCKED] | Bold: **text** | Link: [name](url)
+            </div>
         </div>
 
         <div class="preview-panel">
             <div class="export-container" id="exportArea">
-                <div class="timeline" id="timelineOutput">
-                    </div>
+                <div class="timeline" id="timelineOutput"></div>
             </div>
         </div>
     </main>
@@ -224,9 +168,39 @@
         const brandColor = document.getElementById('brandColor');
         const toast = document.getElementById('toast');
 
-        const defaultText = "2024 | Phase 1: Development\nConcept validation and market research\nMVP development and beta testing\n\n2025 | Phase 2: Launch\nOfficial public launch\nReached initial active user base\nExpanding features based on feedback";
+        const templates = {
+            software: "Q1 2024 | **Phase 1: Architecture**\n[DONE] Finalize database schema\n[DONE] Setup GitHub repository and CI/CD pipelines\n\nQ2 2024 | **Phase 2: Core Features**\n[DONE] Build user authentication\n[ACTIVE] Develop Markdown parsing engine\n[BLOCKED] Waiting on API keys for payment gateway integration\n\nQ3 2024 | **Phase 3: Launch**\nBeta testing with first 100 users\nPublic release on [Product Hunt](https://producthunt.com)",
+            event: "October 10 | **Pre-Event Logistics**\n[DONE] Secure venue deposit\n[DONE] Finalize catering menu and dietary requirements\n\nOctober 15 | **Marketing Push**\n[ACTIVE] Launch social media ad campaign\n[ACTIVE] Send out email blasts to previous attendees\n\nOctober 25 | **Final Checks**\n[BLOCKED] Waiting for keynote speaker flight confirmation\nPrint physical name badges",
+            study: "Week 1 | **Calculus Foundations**\n[DONE] Read Chapters 1-3\n[DONE] Complete practice problem set A\n\nWeek 2 | **Derivatives**\n[ACTIVE] Review Khan Academy lectures on chain rule\n[BLOCKED] Need to ask professor about implicit differentiation\n\nWeek 3 | **Midterm Prep**\nTake practice exam\nReview flashcards"
+        };
 
-        // --- Core Engine: Stateful Rendering ---
+        function loadTemplate(type) {
+            inputText.value = templates[type];
+            handleInput();
+        }
+
+        // --- Core Engine: Markdown & Status Parser ---
+        function parseText(text) {
+            let html = text;
+            let dominantStatus = null; // Used to color the timeline dot
+
+            // 1. Parse Status Tags
+            if (html.includes('[DONE]')) { dominantStatus = 'done'; html = html.replace(/\[DONE\]/g, '<span class="status-pill pill-done">DONE</span>'); }
+            if (html.includes('[ACTIVE]')) { dominantStatus = 'active'; html = html.replace(/\[ACTIVE\]/g, '<span class="status-pill pill-active">ACTIVE</span>'); }
+            if (html.includes('[BLOCKED]')) { dominantStatus = 'blocked'; html = html.replace(/\[BLOCKED\]/g, '<span class="status-pill pill-blocked">BLOCKED</span>'); }
+
+            // 2. Parse Bold (**text**)
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // 3. Parse Italics (*text*)
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // 4. Parse Links [name](url)
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+            return { html, dominantStatus };
+        }
+
         function renderTimeline() {
             const lines = inputText.value.split('\n');
             let html = '';
@@ -239,7 +213,7 @@
 
                 if (trimmedLine.includes('|')) {
                     const parts = trimmedLine.split('|');
-                    currentNode = { date: parts[0].trim(), events: [] };
+                    currentNode = { date: parts[0].trim(), events: [], nodeStatus: null };
                     const event = parts.slice(1).join('|').trim();
                     if (event) currentNode.events.push(event);
                     nodes.push(currentNode);
@@ -247,24 +221,31 @@
                     if (currentNode) {
                         currentNode.events.push(trimmedLine);
                     } else {
-                        currentNode = { date: '', events: [trimmedLine] };
+                        currentNode = { date: '', events: [trimmedLine], nodeStatus: null };
                         nodes.push(currentNode);
                     }
                 }
             });
 
             nodes.forEach(node => {
-                const eventsHtml = node.events.map(e => 
-                    `<div class="event-text" style="margin-top: 0.5rem; position: relative; padding-left: 12px;">
-                        <span style="position: absolute; left: 0; top: 0; color: var(--primary); font-weight: bold;">•</span>
-                        ${e}
-                    </div>`
-                ).join('');
+                let dotClass = "";
+                
+                const eventsHtml = node.events.map(e => {
+                    const parsed = parseText(e);
+                    // Determine dot color based on the most severe status in this node
+                    if (parsed.dominantStatus === 'blocked') node.nodeStatus = 'blocked';
+                    else if (parsed.dominantStatus === 'active' && node.nodeStatus !== 'blocked') node.nodeStatus = 'active';
+                    else if (parsed.dominantStatus === 'done' && !node.nodeStatus) node.nodeStatus = 'done';
+
+                    return `<div class="event-wrapper"><span class="event-bullet">•</span><span class="event-text">${parsed.html}</span></div>`;
+                }).join('');
+
+                if (node.nodeStatus) { dotClass = `dot-${node.nodeStatus}`; }
 
                 html += `
-                    <div class="timeline-item">
+                    <div class="timeline-item ${dotClass}">
                         <div class="content">
-                            ${node.date ? `<span class="date">${node.date}</span>` : ''}
+                            ${node.date ? `<span class="date">${parseText(node.date).html}</span>` : ''}
                             ${eventsHtml}
                         </div>
                     </div>
@@ -273,20 +254,9 @@
             timelineOutput.innerHTML = html;
         }
 
-        // --- Utility: Toast Notification ---
-        function showToast(message) {
-            toast.textContent = message;
-            toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-        }
+        function showToast(message) { toast.textContent = message; toast.className = "show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
+        function handleInput() { renderTimeline(); localStorage.setItem('chronoGraphData', inputText.value); }
 
-        // --- Engine: Auto-Save ---
-        function handleInput() {
-            renderTimeline();
-            localStorage.setItem('chronoGraphData', inputText.value);
-        }
-
-        // --- Engine: URL Decoder & Load Logic ---
         function loadData() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('d')) {
@@ -294,27 +264,20 @@
                     inputText.value = decodeURIComponent(urlParams.get('d'));
                     showToast("Shared timeline loaded!");
                     window.history.replaceState({}, document.title, window.location.pathname);
-                } catch(e) {
-                    console.error("Could not parse shared link.");
-                }
+                } catch(e) { console.error("Could not parse shared link."); }
             } else {
                 const saved = localStorage.getItem('chronoGraphData');
-                inputText.value = saved !== null ? saved : defaultText;
+                inputText.value = saved !== null ? saved : templates['software'];
             }
             renderTimeline();
         }
 
-        // --- Engine: URL Encoder (Share Links) ---
         shareBtn.addEventListener('click', () => {
             const encodedText = encodeURIComponent(inputText.value);
             const shareUrl = window.location.origin + window.location.pathname + '?d=' + encodedText;
-            
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                showToast("Link copied to clipboard!");
-            });
+            navigator.clipboard.writeText(shareUrl).then(() => { showToast("Link copied to clipboard!"); });
         });
 
-        // --- Engine: Theme & Brand Colors ---
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -327,38 +290,25 @@
             localStorage.setItem('chronoBrandColor', e.target.value);
         });
 
-        if (localStorage.getItem('chronoGraphTheme')) {
-            document.documentElement.setAttribute('data-theme', localStorage.getItem('chronoGraphTheme'));
-        }
+        if (localStorage.getItem('chronoGraphTheme')) { document.documentElement.setAttribute('data-theme', localStorage.getItem('chronoGraphTheme')); }
         if (localStorage.getItem('chronoBrandColor')) {
             const savedColor = localStorage.getItem('chronoBrandColor');
             document.documentElement.style.setProperty('--primary', savedColor);
             brandColor.value = savedColor;
         }
 
-        // --- Engine: PNG Export ---
         downloadBtn.addEventListener('click', () => {
             const exportArea = document.getElementById('exportArea');
             const originalText = downloadBtn.innerHTML;
             downloadBtn.innerHTML = "⏳ Generating...";
-            
-            html2canvas(exportArea, {
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-color'),
-                scale: 2
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'timeline-export.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                downloadBtn.innerHTML = "⬇️ Export PNG";
-                showToast("Image downloaded!");
+            html2canvas(exportArea, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-color'), scale: 2 }).then(canvas => {
+                const link = document.createElement('a'); link.download = 'timeline-export.png'; link.href = canvas.toDataURL('image/png'); link.click();
+                downloadBtn.innerHTML = "⬇️ Export PNG"; showToast("Image downloaded!");
             });
         });
 
-        // Event Listeners & Initialization
         inputText.addEventListener('input', handleInput);
         loadData();
     </script>
-
 </body>
 </html>
